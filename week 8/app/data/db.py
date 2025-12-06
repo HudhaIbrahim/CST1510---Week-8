@@ -1,9 +1,11 @@
 import sqlite3
 from pathlib import Path
 
-DB_PATH = Path("C:\Users\dell\Desktop\uni\VS CODE\CST1510---Week-8\week 8\DATA") / "intelligence_platform.db"
+BASE_DIR = Path(r"C:\Users\dell\Desktop\uni\VS CODE\CST1510---Week-8\week 8\DATA")
+DATA_DIR = BASE_DIR / "DATA"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-Path("C:/Users/dell/Desktop/uni/VS CODE/CW2_CST1510_M01088116/DATA").mkdir(parents=False, exist_ok=True)
+DB_PATH = DATA_DIR / "intelligence_platform.db"
 
 def connect_database(db_path=DB_PATH):
     """Connect to SQLite database."""
@@ -35,7 +37,7 @@ def load_csv_to_table(csv_path, table_name):
     return len(df)
 
 def load_all_csv_data():
-    PATH_DATA = Path(r"C:\Users\dell\Desktop\uni\VS CODE\CW2_CST1510_M01088116\DATA")
+    PATH_DATA = Path(r"C:\Users\dell\Desktop\uni\VS CODE\CST1510---Week-8\week 8\DATA")
 
     csv_table_map = {
         "cyber-operations-incidents.csv": "cyber_incidents",

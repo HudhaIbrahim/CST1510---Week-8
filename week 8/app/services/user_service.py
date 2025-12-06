@@ -64,7 +64,7 @@ def migrate_users_from_file(conn, filepath='DATA_DIR/users.txt'):
             # Insert user, ignore if exists
             try:
                 cursor.execute("""
-                    INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)"""
+                    INSERT OR IGNORE INTO users (username, password_hash, role) VALUES (?, ?, ?)"""
                     , (username, password, role)
                 )
 
