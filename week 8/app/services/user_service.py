@@ -1,6 +1,6 @@
 import bcrypt
 from pathlib import Path
-from app.data.db import connect_database
+from app.data.db import connect_database, DATA_DIR
 from app.data.users import get_user_by_username, insert_user
 from app.data.schema import create_users_table
 import sqlite3
@@ -36,42 +36,45 @@ def login_user(username, password):
         return True, f"Login successful!"
     return False, "Incorrect password."
 
-def migrate_users_from_file(conn, filepath='DATA_DIR/users.txt'):
-    """Migrate users from text file to database."""
-    if not Path(filepath).exists():
-        print(f"File {filepath} does not exist.")
-        print("No users migrated.")
-        return
-    
-    cursor = conn.cursor()
-    migrated_count = 0
+def migrate_users_from_file(conn, filename="users.txt"):
+    """
+    Migrate users from DATA/users.txt into the users table.
+    Expected file format:
+        username,password_hash,role
+    """
+    users_file = DATA_DIR / filename
 
-    with open(filepath, 'r') as file:
+    if not users_file.exists():
+        print(f"⚠️ File not found: {users_file}")
+        print("No users migrated.")
+        return 0
+
+    cursor = conn.cursor()
+    migrated = 0
+
+    with open(users_file, "r", encoding="utf-8") as file:
         for line in file:
             line = line.strip()
             if not line:
                 continue
 
-            # Parse line
-            parts = line.split(sep = ',', maxsplit=2)
-            if len(parts) == 3:
-                username = parts[0]
-                password = parts[1]
-                role = parts[2]
-
-            # Insert user, ignore if exists
             try:
-                cursor.execute("""
-                    INSERT OR IGNORE INTO users (username, password_hash, role) VALUES (?, ?, ?)"""
-                    , (username, password, role)
+                username, password_hash, role = line.split(",")
+
+                cursor.execute(
+                    """
+                    INSERT OR IGNORE INTO users (username, password_hash, role)
+                    VALUES (?, ?, ?)
+                    """,
+                    (username.strip(), password_hash.strip(), role.strip())
                 )
 
                 if cursor.rowcount > 0:
-                    migrated_count += 1
-                
-            except sqlite3.Error as e:
-                print(f"Error inserting user {username}: {e}")
-            
-    conn.commit()
-    print(f"Migrated {migrated_count} users from {filepath}.")
+                    migrated += 1
 
+            except Exception as e:
+                print(f"Error processing line '{line}': {e}")
+
+    conn.commit()
+    print(f"✅ Migrated {migrated} users from {users_file}")
+    return migrated
