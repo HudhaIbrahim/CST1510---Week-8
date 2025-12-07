@@ -84,10 +84,3 @@ def create_all_tables(conn):
     create_datasets_metadata_table(conn)
     create_it_tickets_table(conn)
     print("\n🎉 All tables created successfully!")
-
-# Test: Create all tables
-conn = sqlite3.connect('intelligence_platform.db')
-create_all_tables(conn)
-conn.close()
-print("Database setup complete.")
-

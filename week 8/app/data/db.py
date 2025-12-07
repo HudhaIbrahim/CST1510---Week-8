@@ -1,8 +1,8 @@
 import sqlite3
 from pathlib import Path
 
-BASE_DIR = Path(r"C:\Users\dell\Desktop\uni\VS CODE\CST1510---Week-8\week 8\DATA")
-DATA_DIR = BASE_DIR / "DATA"
+BASE_DIR = Path(r"C:\Users\dell\Desktop\uni\VS_CODE\CST1510---Week-8\week 8\DATA")
+DATA_DIR = BASE_DIR
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 DB_PATH = DATA_DIR / "intelligence_platform.db"
@@ -21,9 +21,9 @@ from app.data.schema import create_all_tables
 from app.services.user_service import migrate_users_from_file
 
 
-def load_csv_to_table(csv_path, table_name):
+def load_csv_to_table(conn, csv_path, table_name):
     """Load csv to table."""
-    conn = connect_database()
+
     if not Path(csv_path).exists():
         print(f"File not found: {csv_path}")
         return False
@@ -33,21 +33,23 @@ def load_csv_to_table(csv_path, table_name):
     # if the table exists, append otherwise pandas creates. DataFrame's index will not be added as a separate column
     df.to_sql(table_name, con=conn, if_exists='append', index=False)
     print(f"✅ Loaded {len(df)} rows from {csv_path} into table '{table_name}'.")
-    conn.close() # closes the database. Frees resources and ensures no further operations are made using this connection.
+
     return len(df)
 
-def load_all_csv_data():
-    PATH_DATA = Path(r"C:\Users\dell\Desktop\uni\VS CODE\CST1510---Week-8\week 8\DATA")
+def load_all_csv_data(conn):
+    PATH_DATA = Path(r"C:\Users\dell\Desktop\uni\VS_CODE\CST1510---Week-8\week 8\DATA")
 
     csv_table_map = {
         "cyber-operations-incidents.csv": "cyber_incidents",
         "datasets_metadata.csv": "datasets_metadata",
         "it_tickets.csv": "it_tickets"
     }
-
+    total_rows = 0
     for csv_file, table_name in csv_table_map.items():
         csv_path = str(PATH_DATA / csv_file)
-        load_csv_to_table(csv_path, table_name)
+        rows = load_csv_to_table(conn, csv_path, table_name)
+        total_rows += rows if rows else 0
+    return total_rows
 
 
 # COMPLETE SETUP FUNCTION

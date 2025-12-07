@@ -4,7 +4,6 @@ from app.services.user_service import register_user, login_user, migrate_users_f
 from app.data.incidents import insert_incident, get_all_incidents, get_incidents_by_type_count, \
     get_high_severity_by_status, get_incident_types_with_many_cases
 
-
 def main():
     print("=" * 60)
     print("Week 8: Database Demo")
@@ -13,13 +12,13 @@ def main():
     # 1. Setup database
     conn = connect_database()
     create_all_tables(conn)
-    conn.close()
+
     
     # 2. Migrate users
-    migrate_users_from_file()
+    migrate_users_from_file(conn)
     
     # 3. Test authentication
-    success, msg = register_user("alice", "SecurePass123!", "analyst")
+    success, msg = register_user(conn, "alice", "SecurePass123!", "analyst")
     print(msg)
     
     success, msg = login_user("alice", "SecurePass123!")
@@ -41,7 +40,6 @@ def main():
     print(f"Total incidents: {len(df)}")
 
     # Test: Run analytical queries
-    conn = connect_database()
 
     print("\n Incidents by Type:")
     df_by_type = get_incidents_by_type_count(conn)
